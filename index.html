@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Inequality Dojo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: one centered column (max 780px) on a tatami-mat ground; top bar, then one card stack per screen. Belt colors are the only bright accents besides gold. */
+:root{
+  color-scheme: dark;
+  --mat:#111B2E; --seam:#17233A; --panel:#1A2742; --panel-2:#22345A; --line:#36497A;
+  --ink:#F2F4F8; --ink-dim:#AEB9D1; --on-gold:#1C1404;
+  --gold:#F4B740; --good:#45CC8E; --good-bg:#163A2B; --bad:#FF7A6B; --bad-bg:#3F1E1E; --focus:#8EC5FF;
+  --belt-white:#F3F2EC; --belt-blue:#2F6BFF; --belt-purple:#8A4FDB; --belt-brown:#8B5A33; --belt-black:#0A0A0C;
+  --belt-yellow:#F2C230; --belt-orange:#F07A22; --belt-green:#2FA84F;
+  --bar-black:#0A0A0C; --bar-red:#C8102E; --tape:#FFFFFF;
+  --display:'Bungee','Arial Black',Impact,sans-serif;
+  --body:'Lexend','Segoe UI',Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{margin:0;background-color:var(--mat);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;
+  background-image:linear-gradient(var(--seam) 2px,transparent 2px),linear-gradient(90deg,var(--seam) 2px,transparent 2px);
+  background-size:240px 120px}
+.app{max-width:780px;margin:0 auto;padding-block:16px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{margin:0;text-wrap:balance}
+p{margin:0}
+button{font-family:var(--body)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-size:18px;letter-spacing:.02em}
+.logo span{color:var(--gold)}
+.who{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600}
+.xp{color:var(--gold);font-variant-numeric:tabular-nums}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim)}
+.title{font-family:var(--display);font-size:clamp(40px,10vw,64px);line-height:.95;font-weight:400}
+.title span{color:var(--gold)}
+.lede{font-size:18px;color:var(--ink-dim);max-width:52ch}
+h2{font-size:22px;font-weight:800}
+.fine{font-size:14px;color:var(--ink-dim)}
+.err{color:var(--bad);font-weight:600;font-size:15px}
+
+.btn{font:600 16px var(--body);color:var(--ink);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px 16px;min-height:44px;cursor:pointer}
+.btn:hover{border-color:var(--ink-dim)}
+.btn.primary{background:var(--gold);color:var(--on-gold);border-color:var(--gold)}
+.btn.primary:hover{filter:brightness(1.06)}
+.link{background:none;border:none;color:var(--focus);font:600 15px var(--body);padding:8px 4px;cursor:pointer;min-height:44px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+label{font-weight:700;font-size:15px}
+input{font:500 18px var(--body);padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--mat);color:var(--ink);min-height:44px;flex:1 1 180px;min-width:0}
+.names{display:flex;gap:8px;flex-wrap:wrap}
+.form{display:flex;flex-direction:column;gap:8px}
+
+.beltline{display:flex;gap:8px;flex-wrap:wrap}
+.beltline .belt{width:96px;height:18px}
+.topics{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.topic{display:flex;flex-direction:column;gap:8px;text-align:left;background:var(--panel-2);border:2px solid var(--line);border-radius:14px;padding:18px;color:var(--ink);font-family:var(--body);cursor:pointer}
+.topic:hover{border-color:var(--gold)}
+.topic-name{font-family:var(--display);font-size:26px;line-height:1.1}
+.topic-sample{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.topic-desc{font-size:15px;color:var(--ink-dim)}
+.topic .beltline .belt{width:60px;height:14px}
+.belt{display:block;position:relative;height:26px;width:150px;max-width:100%;border-radius:4px;background:var(--bc);border:1px solid var(--line);flex:0 0 auto;overflow:hidden}
+.belt .bar{position:absolute;right:12%;top:0;bottom:0;width:32%;background:var(--bb);display:flex;gap:4px;justify-content:center;padding:0 4px}
+.belt .bar i{width:4px;background:var(--tape)}
+
+.belts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.beltrow{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px;border-radius:12px;background:var(--panel-2)}
+.beltrow.locked .beltinfo,.beltrow.locked .belt{opacity:.5}
+.beltinfo h3{font-size:18px}
+.beltinfo p{margin:2px 0 6px;color:var(--ink-dim);font-size:15px}
+.pill{display:inline-block;font-size:13px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--mat);border:1px solid var(--line);font-variant-numeric:tabular-nums}
+.pill.good{color:var(--good);border-color:var(--good)}
+.pill.dim{color:var(--ink-dim)}
+.lockmsg{font-size:13px;color:var(--ink-dim);max-width:120px;text-align:right}
+.weak{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.weak li{display:flex;justify-content:space-between;gap:12px;padding:8px 12px;border-radius:8px;background:var(--panel-2);font-size:15px}
+.weak b{color:var(--bad);font-variant-numeric:tabular-nums}
+@media (max-width:560px){
+  .beltrow{grid-template-columns:minmax(0,1fr) auto}
+  .beltrow .belt{grid-column:1/-1;width:100%}
+}
+
+.roundhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.roundhead .belt{width:110px;height:20px}
+.rh-left{display:flex;align-items:center;gap:12px;font-weight:700;font-size:15px}
+.slots{display:flex;gap:6px;align-items:center}
+.slot{width:20px;height:12px;border-radius:2px;background:var(--panel-2);border:1px solid var(--line)}
+.slot.on{background:var(--tape);border-color:var(--tape)}
+.slot.miss{background:transparent;border:2px solid var(--bad)}
+.slot.cur{border:2px solid var(--gold)}
+.phases{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.phase{font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--ink-dim)}
+.phase.now{background:var(--gold);color:var(--on-gold);border-color:var(--gold)}
+.phase.did{color:var(--good);border-color:var(--good)}
+.problem{font-size:clamp(28px,6.4vw,42px);font-weight:700;text-align:center;font-variant-numeric:tabular-nums;overflow-x:auto}
+.pad{display:flex;flex-direction:column;align-items:center;gap:4px;border-top:2px dashed var(--line);padding-top:12px}
+.pad .empty{font-size:14px;color:var(--ink-dim)}
+.pline{font-size:clamp(22px,4.8vw,28px);font-weight:600;font-variant-numeric:tabular-nums}
+.note{font-size:14px;font-weight:700;color:var(--gold)}
+.fresh{animation:pop .35s ease-out}
+@keyframes pop{from{transform:translateY(-6px);opacity:.3}to{transform:none;opacity:1}}
+.sym{margin:0 .22em;color:var(--gold)}
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-size:.72em;line-height:1.1;margin:0 .08em}
+.frac>span:first-child{border-bottom:2px solid currentColor;padding:0 .15em}
+
+.prompt{font-size:20px;font-weight:700}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.opts.box{grid-template-columns:repeat(2,minmax(0,1fr))}
+.opt{font:600 20px var(--body);color:var(--ink);background:var(--panel-2);border:2px solid var(--line);border-radius:12px;padding:12px 14px;min-height:58px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-variant-numeric:tabular-nums}
+.opt:hover:not(:disabled){border-color:var(--gold)}
+.opt.bad{border-color:var(--bad);color:var(--ink-dim);text-decoration:line-through;cursor:not-allowed}
+.opt .sub{font-size:14px;font-weight:500;color:var(--ink-dim)}
+.fb{padding:10px 14px;border-radius:10px;font-weight:600;font-size:16px}
+.fb.good{background:var(--good-bg);color:var(--good)}
+.fb.bad{background:var(--bad-bg);color:var(--ink);border-left:0;animation:shake .3s}
+.fb.bad b{color:var(--bad)}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.tools{display:flex;gap:14px;flex-wrap:wrap}
+.hint{background:var(--mat);border:1px dashed var(--line);border-radius:10px;padding:10px 14px;font-size:15px;color:var(--ink-dim)}
+
+.nl{width:100%;max-width:100%;height:auto;display:block}
+.nl .axis,.nl .tk{stroke:var(--ink);stroke-width:3}
+.nl .axhead{fill:var(--ink)}
+.nl .shade{stroke:var(--gold);stroke-width:9;stroke-linecap:round}
+.nl .shadehead{fill:var(--gold)}
+.nl .dot-open{fill:var(--panel);stroke:var(--gold);stroke-width:4}
+.nl .dot-filled{fill:var(--gold);stroke:var(--gold);stroke-width:4}
+.nl .lbl{fill:var(--ink);font:700 24px var(--body)}
+.nl .lbl.q{fill:var(--ink-dim)}
+.gctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.gctl fieldset{border:1px solid var(--line);border-radius:10px;padding:8px 10px 10px;margin:0;min-width:0}
+.gctl legend{font-size:14px;font-weight:700;padding:0 6px;color:var(--ink-dim)}
+.seg{display:flex;gap:6px}
+.seg button{flex:1 1 0;min-width:0;font:600 16px var(--body);color:var(--ink);background:var(--panel-2);border:1px solid var(--line);border-radius:8px;min-height:44px;cursor:pointer;font-variant-numeric:tabular-nums}
+.seg button[aria-pressed="true"]{background:var(--gold);color:var(--on-gold);border-color:var(--gold)}
+
+.answer{display:flex;justify-content:center}
+.ring{font-size:clamp(26px,6vw,34px);font-weight:700;border:4px solid var(--gold);border-radius:999px;padding:6px 26px;font-variant-numeric:tabular-nums}
+.big-belt .belt{width:100%;height:44px}
+.big-belt .belt .bar i{width:8px}
+.result-num{font-family:var(--display);font-size:56px;line-height:1;color:var(--gold)}
+
+.overlay{position:fixed;inset:0;background:rgba(5,9,18,.75);display:flex;align-items:flex-start;justify-content:center;overflow:auto;z-index:20;
+  padding-top:max(16px,env(safe-area-inset-top,0px));padding-bottom:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:640px;width:100%;display:flex;flex-direction:column;gap:12px}
+.sheethead{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.order{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:4px}
+.order b{color:var(--gold)}
+.boxes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.boxes div{background:var(--panel-2);border-radius:10px;padding:10px 12px}
+.boxes h3{font-size:16px;margin-bottom:2px}
+.boxes p,.sheet>p{font-size:15px}
+.problem.rot{font-size:clamp(20px,4.6vw,26px);font-weight:600;line-height:1.35;text-wrap:balance}
+.grid{width:100%;max-width:440px;height:auto;display:block;margin:0 auto;touch-action:manipulation}
+.grid.live{cursor:crosshair}
+.grid .gl{stroke:var(--line);stroke-width:1}
+.grid .ax{stroke:var(--ink);stroke-width:2.5}
+.grid .gt{fill:var(--ink-dim);font:500 12px var(--body)}
+.grid .pt-g{fill:var(--focus)}
+.grid .pt-a{fill:var(--gold)}
+.grid .pt-guess{fill:none;stroke:var(--gold);stroke-width:3}
+.grid .plbl{font:700 16px var(--body);fill:var(--focus)}
+.grid .plbl.a{fill:var(--gold)}
+.grid .ray{stroke:var(--ink-dim);stroke-width:2;stroke-dasharray:6 5}
+.grid .org{fill:var(--ink)}
+.coord{align-items:center;font-weight:700;font-size:18px}
+.coord input{flex:0 0 84px;width:84px}
+.rules{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}
+.rules th,.rules td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+.rules th{color:var(--ink-dim);font-weight:600}
+.trackhead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+(function(){
+const ROUND=8, PASS=6, KEY='inequality-dojo-v1';
+const FLIP={'<':'>','>':'<','≤':'≥','≥':'≤'};
+const SYMS=['<','>','≤','≥'];
+const VARS=['x','d','g','t','s','h','v','j','f','m','n','p','y','w'];
+const BELTS=[
+  {id:'white', track:'ineq', name:'White Belt', bc:'var(--belt-white)', bb:'var(--bar-black)', types:['A'], right:0, skill:'Box A · Just + or −'},
+  {id:'blue',  track:'ineq', name:'Blue Belt',  bc:'var(--belt-blue)',  bb:'var(--bar-black)', types:['B'], right:0, skill:'Box B · Just × or ÷'},
+  {id:'purple',track:'ineq', name:'Purple Belt',bc:'var(--belt-purple)',bb:'var(--bar-black)', types:['C'], right:0, skill:'Box C · Two steps'},
+  {id:'brown', track:'ineq', name:'Brown Belt', bc:'var(--belt-brown)', bb:'var(--bar-black)', types:['D'], right:0, skill:'Box D · Parentheses'},
+  {id:'black', track:'ineq', name:'Black Belt', bc:'var(--belt-black)', bb:'var(--bar-red)',   types:['A','B','C','C','D','D'], right:.5, skill:'Every box · letter on either side'},
+  {id:'yellow',track:'rot',  name:'Yellow Belt',bc:'var(--belt-yellow)',bb:'var(--bar-black)', rot:[180], skill:'Half turns · 180°'},
+  {id:'orange',track:'rot',  name:'Orange Belt',bc:'var(--belt-orange)',bb:'var(--bar-black)', rot:[90], skill:'Quarter turns · 90° both ways'},
+  {id:'green', track:'rot',  name:'Green Belt', bc:'var(--belt-green)', bb:'var(--bar-black)', rot:[90,180,270], skill:'Every turn · 90°, 180°, 270°'}
+];
+const TRACKS={ineq:'Inequalities',rot:'Rotations'};
+const BOX={A:'Just + or −',B:'Just × or ÷',C:'Both: two steps',D:'Parentheses'};
+const BOXWHY={
+  A:'Only a number added or subtracted on the letter. That is <b>Box A</b>.',
+  B:'Only × or ÷ on the letter (fractions count). That is <b>Box B</b>.',
+  C:'The letter has a × or ÷ AND a + or −. Two steps: <b>Box C</b>.',
+  D:'See the ( )? Parentheses always win: <b>Box D</b>.'
+};
+const PHASE={box:'Pick box',expand:'Multiply in',pm:'Plus / minus',pmres:'Plus / minus',td:'Times / divide',flip:'Times / divide',tdres:'Times / divide',turn:'Turn around',graph:'Draw it',
+  rtype:'Name the turn',rswap:'Swap',rsign:'Change signs',plot:'Plot it'};
+const MISS={box:'Picking the box',expand:'Multiplying into ( )',pm:'Plus or minus step',pmres:'Plus or minus step',td:'Times or divide step',flip:'The flip rule',tdres:'Times or divide step',turn:'Turning it around',graph:'Graphing',
+  rtype:'Naming the turn (rotations)',rswap:'Swapping (rotations)',rsign:'Changing signs (rotations)',plot:'Plotting points'};
+const PRAISE=['Right.','Clean move.','Yes.','That’s it.','Good.'];
+
+/* ---------- helpers ---------- */
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function nz(a,b){let n;do{n=ri(a,b)}while(n===0);return n;}
+function sgnAbs(a,b){return (Math.random()<.5?-1:1)*ri(a,b);}
+function nzDec(){let b;do{b=ri(-150,150)/10}while(b===0||Number.isInteger(b));return b;}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const r1=x=>Math.round(x*10)/10;
+function fmt(n){n=r1(n);if(Object.is(n,-0))n=0;const s=Number.isInteger(n)?String(n):n.toFixed(1);return s.replace('-','−');}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+const V=v=>`<i>${v}</i>`;
+function coefHTML(a,v){return (a===1?'':a===-1?'−':fmt(a))+V(v);}
+const par=a=>a<0?`(${fmt(a)})`:fmt(a);
+const fracHTML=(t,b)=>`<span class="frac"><span>${t}</span><span>${b}</span></span>`;
+function termHTML(form,a,v){if(form==='mul')return coefHTML(a,v);if(form==='div')return fracHTML(V(v),fmt(a));return fracHTML('1',fmt(a))+V(v);}
+const plusTerm=b=>` ${b<0?'−':'+'} ${fmt(Math.abs(b))}`;
+const L=(l,s,r)=>({l,s,r});
+function lineHTML(x,swap){return swap?`${x.r}<span class="sym">${FLIP[x.s]}</span>${x.l}`:`${x.l}<span class="sym">${x.s}</span>${x.r}`;}
+
+function finalize(cands,swap,fill){
+  const seen=new Set(),out=[];
+  for(const o of cands){const html=o.html||lineHTML(o.line,swap);if(seen.has(html))continue;seen.add(html);out.push(Object.assign({},o,{html}));}
+  let n=1;
+  while(out.length<3&&n<20){const ex=fill(n++);const html=lineHTML(ex,swap);if(!seen.has(html)){seen.add(html);out.push({line:ex,html,why:'Check the math one more time.'});}}
+  return shuffle(out);
+}
+
+/* ---------- problem builder ---------- */
+function boxStep(t){
+  return {tag:'box',prompt:'Which box is this problem?',
+    hint:'Check in order. See ( )? Box D. × or ÷ AND + or −? Box C. Only + or −? Box A. Only × or ÷? Box B.',
+    options:['A','B','C','D'].map(x=>({html:`<b>Box ${x}</b><span class="sub">${BOX[x]}</span>`,ok:x===t,why:BOXWHY[t]})),
+    add:[{note:`Box ${t}: ${BOX[t]}`}]};
+}
+function pmSteps(Pr,lhsAfter,b,c,S){
+  const after=r1(c-b);
+  const op=b>0?`−${fmt(b)}`:`+${fmt(-b)}`;
+  const wop=b>0?`+${fmt(b)}`:`−${fmt(-b)}`;
+  const s1={tag:'pm',prompt:'Plus or minus first. What do you do to BOTH sides?',
+    hint:'Find the number added or subtracted next to the letter. Do the opposite to both sides.',
+    options:shuffle([
+      {html:`${op} both sides`,ok:true},
+      {html:`${wop} both sides`,why:`That ${fmt(Math.abs(b))} is ${b>0?'added':'subtracted'}. Do the <b>opposite</b> to get rid of it.`},
+      {html:`÷ ${fmt(Math.abs(b))} both sides`,why:'Get rid of a + or − with a + or −. Times and divide come <b>after</b>.'}
+    ]),
+    add:[{note:`${op} both sides`}]};
+  const good=L(lhsAfter,S,fmt(after));
+  const s2={tag:'pmres',prompt:'Which line comes next?',
+    hint:`Do ${op} to the number on the other side. The sign stays the same.`,
+    options:finalize([
+      {line:good,ok:true},
+      {line:L(lhsAfter,S,fmt(r1(c+b))),why:`Check the math: ${fmt(c)} ${b>0?'−':'+'} ${fmt(Math.abs(b))} = <b>${fmt(after)}</b>.`},
+      {line:L(lhsAfter,FLIP[S],fmt(after)),why:'Adding or subtracting <b>never</b> flips the sign. Copy it exactly.'}
+    ],Pr.rightSide,n=>L(lhsAfter,S,fmt(after+n))),
+    add:[{line:good,swap:Pr.rightSide}]};
+  return [s1,s2];
+}
+function tdSteps(Pr,form,a,cur,S){
+  const v=Pr.v,neg=a<0;
+  const k=form==='mul'?cur/a:cur*a;
+  let ok,w1,why1,verb;
+  if(form==='mul'){ok=`÷ ${par(a)}`;w1=`× ${par(a)}`;why1=`The letter is <b>multiplied</b> by ${fmt(a)}. Undo it by dividing.`;verb='divided';}
+  else{ok=`× ${par(a)}`;w1=`÷ ${par(a)}`;why1=form==='frac'?`It’s a fraction. Multiply by the bottom number, <b>${fmt(a)}</b>.`:`The letter is <b>divided</b> by ${fmt(a)}. Undo it by multiplying.`;verb='multiplied';}
+  const w2=(form==='mul'?'÷ ':'× ')+par(-a);
+  const s1={tag:'td',prompt:'Times or divide. What do you do to BOTH sides?',
+    hint:'Undo whatever is stuck to the letter. A fraction? Multiply by the bottom number.',
+    options:shuffle([{html:`${ok} both sides`,ok:true},{html:`${w1} both sides`,why:why1},{html:`${w2} both sides`,why:'Use the number exactly as it is, <b>sign included</b>.'}]),
+    add:[{note:`${ok} both sides`}]};
+  const s2={tag:'flip',prompt:`You ${verb} by ${par(a)}. Do you flip the sign?`,
+    hint:'Only × or ÷ by a NEGATIVE number flips the sign.',
+    options:[
+      {html:'Yes, flip it',ok:neg,why:`${fmt(a)} is <b>positive</b>. No flip, even if other numbers are negative.`},
+      {html:'No, keep it',ok:!neg,why:`${fmt(a)} is <b>negative</b>. × or ÷ by a negative ALWAYS flips.`}
+    ],
+    add:[{note:neg?'negative → FLIP':'positive → no flip'}]};
+  const S2=neg?FLIP[S]:S;
+  const good=L(V(v),S2,fmt(k));
+  const wk=form==='mul'?cur*a:cur/a;
+  const s3={tag:'tdres',prompt:'Which line comes next?',
+    hint:`Work out ${fmt(cur)} ${form==='mul'?'÷':'×'} ${par(a)}. Then decide: flip or keep?`,
+    options:finalize([
+      {line:good,ok:true},
+      {line:L(V(v),FLIP[S2],fmt(k)),why:neg?'You used a negative number. The sign <b>must flip</b>.':'Positive number. The sign <b>stays the same</b>.'},
+      {line:L(V(v),S2,fmt(Number.isInteger(wk)&&wk!==k?wk:-k)),why:`Check the math: ${fmt(cur)} ${form==='mul'?'÷':'×'} ${par(a)} = <b>${fmt(k)}</b>.`}
+    ],Pr.rightSide,n=>L(V(v),S2,fmt(k+n))),
+    add:[{line:good,swap:Pr.rightSide}]};
+  return {steps:[s1,s2,s3],k,S2};
+}
+function expandStep(Pr,a,d,e,A,B,S,c){
+  const v=Pr.v;
+  const good=coefHTML(A,v)+plusTerm(B);
+  const opts=[
+    {html:good,ok:true},
+    {html:coefHTML(A,v)+plusTerm(e),why:`Multiply ${fmt(a)} into <b>everything</b> inside, the ${fmt(e)} too.`},
+    {html:coefHTML(A,v)+plusTerm(-B),why:`${fmt(a)} × ${fmt(e)} = <b>${fmt(B)}</b>. The sign comes along.`},
+    {html:coefHTML(d,v)+plusTerm(B),why:'The letter term gets multiplied too.'}
+  ];
+  const seen=new Set();
+  return {tag:'expand',prompt:`Multiply ${fmt(a)} into everything inside the ( ):`,
+    hint:'The outside number times EVERY term inside, sign included.',
+    options:shuffle(opts.filter(o=>!seen.has(o.html)&&seen.add(o.html))),
+    add:[{note:'multiply in'},{line:L(good,S,fmt(c)),swap:Pr.rightSide}]};
+}
+function turnStep(Pr,k,S){
+  const v=Pr.v,good=L(V(v),S,fmt(k));
+  return {tag:'turn',prompt:'The letter is on the right. Turn it around so the letter is on the left.',
+    hint:'Swap the two sides. The sign turns with them, so its open side still faces the bigger side.',
+    options:finalize([
+      {line:good,ok:true},
+      {line:L(V(v),FLIP[S],fmt(k)),why:'When the sides swap, the sign <b>turns with them</b>.'},
+      {line:L(V(v),S,fmt(-k)),why:'Turning it around never changes the number.'}
+    ],false,n=>L(V(v),S,fmt(k+n))),
+    add:[{line:good,swap:false}]};
+}
+function graphStep(k){
+  const mids=[];[k,0,-k,k+1,k-1].forEach(x=>{x=r1(x);if(!mids.some(m=>m===x))mids.push(x);});
+  return {tag:'graph',kind:'graph',mids:shuffle(mids.slice(0,3)),
+    hint:'Your answer goes on the middle tick. Line under the sign = filled dot. Greater than shades right, less than shades left.'};
+}
+function makeProblem(type,right){
+  const v=pick(VARS),S=pick(SYMS),Pr={type,v,rightSide:right,steps:[]};
+  let fin;
+  if(type==='A'){
+    const dec=Math.random()<.25,b=dec?nzDec():nz(-15,15),c=dec?ri(-200,200)/10:ri(-20,20);
+    Pr.start=L(V(v)+plusTerm(b),S,fmt(c));
+    Pr.steps.push(boxStep('A'),...pmSteps(Pr,V(v),b,c,S));
+    fin={k:r1(c-b),S};
+  }else if(type==='B'){
+    const form=pick(['mul','mul','div','frac']),a=form==='frac'?ri(2,5):sgnAbs(2,9);
+    const c=form==='mul'?a*ri(-12,12):nz(-9,9);
+    Pr.start=L(termHTML(form,a,v),S,fmt(c));
+    const t=tdSteps(Pr,form,a,c,S);
+    Pr.steps.push(boxStep('B'),...t.steps);fin={k:t.k,S:t.S2};
+  }else if(type==='C'){
+    const form=pick(['mul','mul','div','frac']),a=form==='frac'?ri(2,5):sgnAbs(2,9),b=nz(-20,20);
+    const cur=form==='mul'?a*ri(-10,10):nz(-8,8),c=cur+b;
+    Pr.start=L(termHTML(form,a,v)+plusTerm(b),S,fmt(c));
+    const t=tdSteps(Pr,form,a,cur,S);
+    Pr.steps.push(boxStep('C'),...pmSteps(Pr,termHTML(form,a,v),b,c,S),...t.steps);fin={k:t.k,S:t.S2};
+  }else{
+    const a=sgnAbs(2,6),d=ri(1,4),e=nz(-9,9),A=a*d,B=a*e,k0=ri(-8,8),c=A*k0+B;
+    Pr.start=L(`${fmt(a)}(${coefHTML(d,v)}${plusTerm(e)})`,S,fmt(c));
+    const t=tdSteps(Pr,'mul',A,A*k0,S);
+    Pr.steps.push(boxStep('D'),expandStep(Pr,a,d,e,A,B,S,c),...pmSteps(Pr,coefHTML(A,v),B,c,S),...t.steps);fin={k:t.k,S:t.S2};
+  }
+  if(right)Pr.steps.push(turnStep(Pr,fin.k,fin.S));
+  Pr.k=fin.k;Pr.S=fin.S;
+  Pr.steps.push(graphStep(fin.k));
+  return Pr;
+}
+
+/* ---------- rotations ---------- */
+const pt=(a,b)=>`(${fmt(a)}, ${fmt(b)})`;
+function makeRot(deg){
+  const name=pick(['A','B','C','G','K','M','P','Q','R','T']);
+  let x,y;do{x=nz(-8,8);y=nz(-8,8);}while(Math.abs(x)===Math.abs(y));
+  const ccw=Math.random()<.5;
+  const q=(((deg/90)*(ccw?1:-1))%4+4)%4; /* 1 = quarter counterclockwise, 2 = half, 3 = quarter clockwise */
+  const ans=q===2?[-x,-y]:q===1?[-y,x]:[y,-x];
+  const N=V(name),Np=V(name)+'′';
+  const Pr={kind:'rot',name,x,y,deg,ccw,q,ax:ans[0],ay:ans[1],steps:[]};
+  Pr.startHTML=`Turn ${N}${pt(x,y)} ${deg}° ${ccw?'counterclockwise ↺':'clockwise ↻'} around the origin. Where is ${Np}?`;
+  const typeWhy={
+    2:'180° is a <b>half turn</b>. Clockwise or counterclockwise, it lands in the same spot.',
+    1:deg===90?'90° is a <b>quarter turn</b>, and this one goes counterclockwise ↺.':'270° clockwise is three quarter turns. That lands in the same spot as <b>one quarter turn counterclockwise</b> ↺.',
+    3:deg===90?'90° is a <b>quarter turn</b>, and this one goes clockwise ↻.':'270° counterclockwise is three quarter turns. That lands in the same spot as <b>one quarter turn clockwise</b> ↻.'
+  };
+  const typeNote={2:'half turn',1:'quarter turn ↺ counterclockwise',3:'quarter turn ↻ clockwise'};
+  Pr.steps.push({tag:'rtype',prompt:'What kind of turn is this?',
+    hint:'90° = quarter turn. 180° = half turn. 270° one way = a quarter turn the OTHER way.',
+    options:[
+      {html:'<b>Half turn</b><span class="sub">180°</span>',ok:q===2,why:typeWhy[q]},
+      {html:'<b>Quarter turn ↺</b><span class="sub">counterclockwise</span>',ok:q===1,why:typeWhy[q]},
+      {html:'<b>Quarter turn ↻</b><span class="sub">clockwise</span>',ok:q===3,why:typeWhy[q]}
+    ],
+    add:[{note:typeNote[q]}]});
+  if(q===2){
+    Pr.steps.push({tag:'rsign',prompt:`Half turn: change BOTH signs. ${N}${pt(x,y)} becomes…`,
+      hint:'A half turn keeps the numbers in place and flips both signs. Positive becomes negative, negative becomes positive.',
+      options:shuffle([
+        {html:pt(-x,-y),ok:true},
+        {html:pt(-x,y),why:'Change <b>both</b> signs, not just the first.'},
+        {html:pt(x,-y),why:'Change <b>both</b> signs, not just the second.'},
+        {html:pt(-y,-x),why:'A half turn does <b>not</b> swap. Just change both signs.'}
+      ]),
+      add:[{note:'change both signs'},{html:`${Np}${pt(-x,-y)}`}]});
+  }else{
+    Pr.steps.push({tag:'rswap',prompt:`Quarter turn: first, SWAP the two numbers. ${N}${pt(x,y)} →`,
+      hint:'Swap means the second number moves to the front. Keep the signs exactly as they are for now.',
+      options:shuffle([
+        {html:pt(y,x),ok:true},
+        {html:pt(x,y),why:'Swap them: the second number moves to the <b>front</b>.'},
+        {html:pt(-x,-y),why:'Changing both signs is a <b>half</b> turn. A quarter turn starts with a swap.'}
+      ]),
+      add:[{note:'swap'},{html:pt(y,x)}]});
+    const right=q===1?[-y,x]:[y,-x],wrong=q===1?[y,-x]:[-y,x];
+    Pr.steps.push({tag:'rsign',
+      prompt:q===1?'Counterclockwise ↺: change the sign of the FIRST number.':'Clockwise ↻: change the sign of the SECOND number.',
+      hint:'Counterclockwise changes the first number. Clockwise changes the second. Only ONE sign changes on a quarter turn.',
+      options:shuffle([
+        {html:pt(right[0],right[1]),ok:true},
+        {html:pt(wrong[0],wrong[1]),why:q===1?'That changed the second number. Counterclockwise changes the <b>first</b>.':'That changed the first number. Clockwise changes the <b>second</b>.'},
+        {html:pt(-y,-x),why:'A quarter turn changes only <b>one</b> sign.'}
+      ]),
+      add:[{note:q===1?'change the first sign':'change the second sign'},{html:`${Np}${pt(right[0],right[1])}`}]});
+  }
+  Pr.steps.push({tag:'plot',kind:'plot',hint:'Start at the origin (0, 0). The first number moves left or right. The second number moves up or down.'});
+  return Pr;
+}
+function gridSVG(Pr,guess,final){
+  const S=20,O=220,X=v=>O+v*S,Y=v=>O-v*S;
+  let g='';
+  for(let i=-10;i<=10;i++){g+=`<line class="gl" x1="${X(i)}" y1="${Y(-10)}" x2="${X(i)}" y2="${Y(10)}"></line><line class="gl" x1="${X(-10)}" y1="${Y(i)}" x2="${X(10)}" y2="${Y(i)}"></line>`;}
+  g+=`<line class="ax" x1="${X(-10)}" y1="${O}" x2="${X(10)}" y2="${O}"></line><line class="ax" x1="${O}" y1="${Y(-10)}" x2="${O}" y2="${Y(10)}"></line>`;
+  for(let i=-10;i<=10;i+=2){if(!i)continue;g+=`<text class="gt" x="${X(i)}" y="${O+16}" text-anchor="middle">${fmt(i)}</text><text class="gt" x="${O-6}" y="${Y(i)+4}" text-anchor="end">${fmt(i)}</text>`;}
+  if(final)g+=`<line class="ray" x1="${O}" y1="${O}" x2="${X(Pr.x)}" y2="${Y(Pr.y)}"></line><line class="ray" x1="${O}" y1="${O}" x2="${X(Pr.ax)}" y2="${Y(Pr.ay)}"></line>`;
+  g+=`<circle class="org" cx="${O}" cy="${O}" r="3.5"></circle>`;
+  g+=`<circle class="pt-g" cx="${X(Pr.x)}" cy="${Y(Pr.y)}" r="6"></circle><text class="plbl" x="${X(Pr.x)+9}" y="${Y(Pr.y)-9}">${Pr.name}</text>`;
+  if(final)g+=`<circle class="pt-a" cx="${X(Pr.ax)}" cy="${Y(Pr.ay)}" r="7"></circle><text class="plbl a" x="${X(Pr.ax)+9}" y="${Y(Pr.ay)-9}">${Pr.name}′</text>`;
+  else if(guess&&guess.x!==null&&guess.y!==null)g+=`<circle class="pt-guess" cx="${X(guess.x)}" cy="${Y(guess.y)}" r="9"></circle>`;
+  return `<svg class="grid ${final?'':'live'}" viewBox="0 0 440 440" ${final?'':'data-act="plotclick"'} role="img" aria-label="Coordinate grid from negative 10 to 10">${g}</svg>`;
+}
+
+/* ---------- storage ---------- */
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.players)return s;}catch(e){}return {players:{},last:''};}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}}
+function newPlayer(){const belts={};BELTS.forEach(b=>belts[b.id]={best:0,earned:false});return {xp:0,belts,misses:{}};}
+let store=load();
+let state={screen:'login',player:null,track:null,round:null,cheat:false,err:''};
+const ROT_TAGS=['rtype','rswap','rsign','plot'];
+function me(){const p=store.players[state.player];if(p)BELTS.forEach(b=>{if(!p.belts[b.id])p.belts[b.id]={best:0,earned:false};});return p;}
+function bumpMiss(tag){const m=me().misses;m[tag]=(m[tag]||0)+1;}
+
+/* ---------- round flow ---------- */
+function startRound(beltId,trackArg){
+  const b=beltId?BELTS.find(x=>x.id===beltId):null;
+  const track=b?b.track:(trackArg||'ineq');
+  const problems=[];
+  for(let i=0;i<ROUND;i++){
+    if(track==='rot')problems.push(makeRot(pick(b?b.rot:[90,180,270])));
+    else problems.push(makeProblem(pick(b?b.types:['A','B','C','C','D','D']),Math.random()<(b?b.right:.3)));
+  }
+  state.track=track;
+  state.round={belt:beltId||null,track,problems,idx:0,results:[]};
+  resetProblem();state.screen='round';
+}
+function resetProblem(){
+  const R=state.round,Pr=R.problems[R.idx];
+  Object.assign(R,{step:0,pad:[Pr.kind==='rot'?{html:''}:{line:Pr.start,swap:Pr.rightSide}],fresh:99,wrong:[],clean:true,done:false,fb:null,hint:false,g:{mid:null,dot:null,shade:null,px:null,py:null}});
+}
+function checkPlot(){
+  const R=state.round,Pr=curP(),g=R.g;
+  if(g.px===Pr.ax&&g.py===Pr.ay){if(R.clean)me().xp+=10;advance();}
+  else{
+    R.clean=false;bumpMiss('plot');
+    R.fb={good:false,text:(g.px===Pr.ay&&g.py===Pr.ax)?'Those numbers are backwards. The <b>first</b> number moves left or right. The <b>second</b> moves up or down.':
+      `${Pr.name}′ is at ${pt(Pr.ax,Pr.ay)}. From the origin, go <b>${Math.abs(Pr.ax)} ${Pr.ax>0?'right':'left'}</b>, then <b>${Math.abs(Pr.ay)} ${Pr.ay>0?'up':'down'}</b>.`};
+  }
+  save();render();
+}
+function curP(){return state.round.problems[state.round.idx];}
+function curS(){return curP().steps[state.round.step];}
+function applyAdd(step){
+  const R=state.round;if(!step.add)return;
+  R.fresh=R.pad.length;
+  step.add.forEach(x=>R.pad.push(x));
+}
+function advance(){
+  const R=state.round;R.step++;R.wrong=[];R.hint=false;
+  if(R.step>=curP().steps.length){
+    R.done=true;R.results.push(R.clean);
+    if(R.clean)me().xp+=25;
+    R.fb={good:true,text:R.clean?'Clean problem. Stripe earned.':'Solved. No stripe this time because of a miss.'};
+  }
+}
+function choose(i){
+  const R=state.round,step=curS(),o=step.options[i];
+  if(!o||R.wrong.includes(i))return;
+  if(o.ok){
+    if(!R.wrong.length)me().xp+=10;
+    applyAdd(step);R.fb={good:true,text:pick(PRAISE)};advance();
+  }else{
+    R.wrong.push(i);R.clean=false;bumpMiss(step.tag);R.fb={good:false,text:o.why||'Not that one. Try again.'};
+  }
+  save();render();
+}
+function checkGraph(){
+  const R=state.round,Pr=curP(),g=R.g;
+  const wantFilled=Pr.S==='≤'||Pr.S==='≥',wantRight=Pr.S==='>'||Pr.S==='≥';
+  const errs=[];
+  if(g.mid!==Pr.k)errs.push(`Put <b>your answer, ${fmt(Pr.k)}</b>, on the middle tick. Not 0.`);
+  if((g.dot==='filled')!==wantFilled)errs.push(wantFilled?'The sign has a line under it, so the dot is <b>filled</b>.':'No line under the sign, so the dot is <b>open</b>.');
+  if((g.shade==='right')!==wantRight)errs.push(wantRight?'Greater than means bigger numbers: shade <b>right</b>.':'Less than means smaller numbers: shade <b>left</b>.');
+  if(errs.length){R.clean=false;bumpMiss('graph');R.fb={good:false,text:errs.join(' ')};}
+  else{if(R.clean)me().xp+=10;advance();}
+  save();render();
+}
+function nextProblem(){
+  const R=state.round;
+  if(R.idx+1<R.problems.length){R.idx++;resetProblem();}
+  else{
+    const n=R.results.filter(Boolean).length;let promoted=false;
+    if(R.belt){const st=me().belts[R.belt];st.best=Math.max(st.best,n);if(n>=PASS&&!st.earned){st.earned=true;promoted=true;me().xp+=200;}}
+    R.summary={n,promoted};state.screen='result';
+  }
+  save();render();
+}
+
+/* ---------- views ---------- */
+function beltHTML(b,stripes){
+  return `<span class="belt" style="--bc:${b.bc};--bb:${b.bb}" aria-hidden="true"><span class="bar">${'<i></i>'.repeat(stripes)}</span></span>`;
+}
+function topBar(){
+  const p=state.player&&me();
+  return `<header class="top"><div class="logo">Inequality <span>Dojo</span></div>
+  ${p?`<div class="who"><span class="chip">${esc(state.player)}</span><span class="chip xp">${p.xp} XP</span>
+    <button class="btn" data-act="cheat">Cheat sheet</button>
+    ${state.screen!=='map'?'<button class="btn" data-act="map">Belts</button>':''}</div>`:''}
+  </header>`;
+}
+function viewLogin(){
+  const names=Object.keys(store.players);
+  return `<section class="card">
+    <p class="eyebrow">Unit 2 · Inequalities</p>
+    <h1 class="title">Inequality<br><span>Dojo</span></h1>
+    <p class="lede">Earn belts in inequalities and rotations, one move at a time. Get 6 of 8 problems clean to get promoted.</p>
+    <div class="beltline">${BELTS.map(b=>beltHTML(b,0)).join('')}</div>
+  </section>
+  <section class="card">
+    <h2>Who’s training?</h2>
+    ${names.length?`<div class="names">${names.map(n=>`<button class="btn" data-act="pick" data-name="${esc(n)}">${esc(n)}</button>`).join('')}</div>`:''}
+    <form id="new-form" class="form">
+      <label for="player-name">${names.length?'New trainee':'Your first name'}</label>
+      <div class="row"><input id="player-name" maxlength="20" autocomplete="off" placeholder="First name"><button class="btn primary" type="submit">Start training</button></div>
+      ${state.err?`<p class="err">${state.err}</p>`:''}
+    </form>
+    <p class="fine">Progress saves in this browser on this Chromebook.</p>
+  </section>`;
+}
+function viewTopics(){
+  const p=me();
+  const card=(tr,sample,desc)=>{
+    const list=BELTS.filter(b=>b.track===tr),earned=list.filter(b=>p.belts[b.id].earned).length;
+    return `<button class="topic" data-act="topic" data-track="${tr}">
+      <span class="eyebrow">${earned} of ${list.length} belts earned</span>
+      <span class="topic-name">${TRACKS[tr]}</span>
+      <span class="topic-sample">${sample}</span>
+      <span class="topic-desc">${desc}</span>
+      <span class="beltline">${list.map(b=>beltHTML(b,p.belts[b.id].earned?4:0)).join('')}</span>
+    </button>`;
+  };
+  return `<section class="card"><p class="eyebrow">Today’s training</p><h2>What are we studying?</h2>
+    <div class="topics">
+      ${card('ineq',`−2<i>g</i> + 4<span class="sym">≥</span>−18`,'Solve it and graph it. Pick the box, plus or minus, times or divide, flip?, then draw it.')}
+      ${card('rot',`<i>G</i>(−5, −1) turned 180°`,'Turn points around the origin. Name the turn, swap, change signs, then plot it.')}
+    </div></section>
+  <div class="row"><button class="link" data-act="switch">Switch trainee</button></div>`;
+}
+function viewMap(){
+  if(!state.track)return viewTopics();
+  const p=me();
+  const trackCard=tr=>{
+    const list=BELTS.filter(b=>b.track===tr);
+    const rows=list.map((b,i)=>{
+      const st=p.belts[b.id],open=i===0||p.belts[list[i-1].id].earned;
+      const status=st.earned?'<span class="pill good">Earned</span>':open?`<span class="pill">Best: ${st.best} of ${ROUND} clean</span>`:'<span class="pill dim">Locked</span>';
+      return `<li class="beltrow ${open?'':'locked'}">${beltHTML(b,st.earned?4:0)}
+        <div class="beltinfo"><h3>${b.name}</h3><p>${b.skill}</p>${status}</div>
+        ${open?`<button class="btn ${st.earned?'':'primary'}" data-act="train" data-belt="${b.id}">${st.earned?'Retest':'Train'}</button>`:`<span class="lockmsg">Earn ${list[i-1].name} first</span>`}
+      </li>`;}).join('');
+    return `<section class="card"><div class="trackhead"><div><p class="eyebrow">Belt track</p><h2>${TRACKS[tr]}</h2></div>
+      <button class="btn" data-act="openmat" data-track="${tr}">Open mat: practice</button></div>
+      <ul class="belts">${rows}</ul></section>`;
+  };
+  const agg={};Object.entries(p.misses).forEach(([t,n])=>{if((state.track==='rot')!==ROT_TAGS.includes(t))return;const l=MISS[t]||t;agg[l]=(agg[l]||0)+n;});
+  const weak=Object.entries(agg).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  return `<div class="row" style="justify-content:space-between;align-items:center">
+    <p class="fine" style="flex:1 1 300px">Each belt test is ${ROUND} problems. Get ${PASS} clean (no misses) to earn the belt. Open mat is practice with no belt on the line.</p>
+    <button class="btn" data-act="topics">Change topic</button></div>
+  ${trackCard(state.track)}
+  <section class="card"><h2>Watch out for</h2>
+    ${weak.length?`<ul class="weak">${weak.map(w=>`<li><span>${w[0]}</span><b>${w[1]} miss${w[1]===1?'':'es'}</b></li>`).join('')}</ul>`:'<p class="fine">No misses logged yet.</p>'}
+    <div class="row"><button class="link" data-act="switch">Switch trainee</button></div></section>`;
+}
+function phasesHTML(Pr,si,done){
+  const seq=[];
+  Pr.steps.forEach((s,i)=>{const n=PHASE[s.tag];const last=seq[seq.length-1];if(last&&last.n===n)last.b=i;else seq.push({n,a:i,b:i});});
+  return seq.map(p=>`<li class="phase ${done||si>p.b?'did':si>=p.a?'now':''}">${p.n}</li>`).join('');
+}
+function numberLine(g,final){
+  const ticks=Array.from({length:11},(_,i)=>`<line class="tk" x1="${50+i*50}" y1="36" x2="${50+i*50}" y2="60"></line>`).join('');
+  let shade='';
+  if(g.shade==='left')shade=`<line class="shade" x1="300" y1="48" x2="30" y2="48"></line><polygon class="shadehead" points="10,48 34,36 34,60"></polygon>`;
+  if(g.shade==='right')shade=`<line class="shade" x1="300" y1="48" x2="570" y2="48"></line><polygon class="shadehead" points="590,48 566,36 566,60"></polygon>`;
+  const dot=g.dot?`<circle class="dot-${g.dot}" cx="300" cy="48" r="12"></circle>`:'';
+  const lbl=g.mid===null?'<text class="lbl q" x="300" y="94" text-anchor="middle">?</text>':`<text class="lbl" x="300" y="94" text-anchor="middle">${fmt(g.mid)}</text>`;
+  return `<svg class="nl" viewBox="0 0 600 104" role="img" aria-label="Number line${final?' showing the answer':''}">
+    <line class="axis" x1="14" y1="48" x2="586" y2="48"></line>
+    <polygon class="axhead" points="2,48 18,39 18,57"></polygon><polygon class="axhead" points="598,48 582,39 582,57"></polygon>
+    ${ticks}${shade}${dot}${lbl}</svg>`;
+}
+function fbHTML(){const R=state.round;return R.fb?`<p class="fb ${R.fb.good?'good':'bad'}" role="status">${R.fb.text}</p>`:'';}
+function toolsHTML(step){
+  const R=state.round;
+  return `<div class="tools"><button class="link" data-act="hint" aria-expanded="${R.hint}">${R.hint?'Hide hint':'Hint'}</button><button class="link" data-act="cheat">Cheat sheet</button></div>
+  ${R.hint?`<p class="hint">${step.hint}</p>`:''}`;
+}
+function viewRound(){
+  const R=state.round,Pr=curP(),step=curS();
+  const belt=R.belt?BELTS.find(b=>b.id===R.belt):null;
+  const slots=Array.from({length:ROUND},(_,i)=>`<span class="slot ${i<R.results.length?(R.results[i]?'on':'miss'):i===R.idx?'cur':''}"></span>`).join('');
+  const pad=R.pad.slice(1).map((e,j)=>{const i=j+1,f=i>=R.fresh?' fresh':'';return e.note?`<div class="note${f}">${e.note}</div>`:e.html!==undefined?`<div class="pline${f}">${e.html}</div>`:`<div class="pline${f}">${lineHTML(e.line,e.swap)}</div>`;}).join('');
+  const isRot=Pr.kind==='rot';
+  let area='';
+  if(R.done&&isRot){
+    area=`<section class="card">${fbHTML()}
+      <div class="answer"><span class="ring">${V(Pr.name)}′${pt(Pr.ax,Pr.ay)}</span></div>
+      ${gridSVG(Pr,null,true)}
+      <p class="fine" style="text-align:center">The dashed lines show the turn around the origin.</p>
+      <div class="row"><button class="btn primary" data-act="next">${R.idx+1<R.problems.length?'Next problem':'See results'}</button></div></section>`;
+  }else if(step.kind==='plot'){
+    const g=R.g,ready=g.px!==null&&g.py!==null;
+    area=`<section class="card"><p class="prompt">Plot ${V(Pr.name)}′${pt(Pr.ax,Pr.ay)}. Tap its spot on the grid.</p>
+      ${gridSVG(Pr,{x:g.px,y:g.py},false)}
+      <div class="row coord"><span>Or type it:</span><label for="plot-x" class="fine">x</label><input id="plot-x" type="number" min="-10" max="10" step="1" value="${g.px===null?'':g.px}">
+        <label for="plot-y" class="fine">y</label><input id="plot-y" type="number" min="-10" max="10" step="1" value="${g.py===null?'':g.py}"></div>
+      ${fbHTML()}
+      <div class="row"><button class="btn primary" data-act="pcheck" ${ready?'':'disabled'}>Check point</button></div>
+      ${toolsHTML(step)}</section>`;
+  }else if(R.done){
+    area=`<section class="card">${fbHTML()}
+      <div class="answer"><span class="ring">${lineHTML(L(V(Pr.v),Pr.S,fmt(Pr.k)),false)}</span></div>
+      ${numberLine({mid:Pr.k,dot:(Pr.S==='≤'||Pr.S==='≥')?'filled':'open',shade:(Pr.S==='>'||Pr.S==='≥')?'right':'left'},true)}
+      <div class="row"><button class="btn primary" data-act="next">${R.idx+1<R.problems.length?'Next problem':'See results'}</button></div></section>`;
+  }else if(step.kind==='graph'){
+    const g=R.g,ready=g.mid!==null&&g.dot&&g.shade;
+    area=`<section class="card"><p class="prompt">Draw it: <span style="font-variant-numeric:tabular-nums">${lineHTML(L(V(Pr.v),Pr.S,fmt(Pr.k)),false)}</span></p>
+      ${numberLine(g,false)}
+      <div class="gctl">
+        <fieldset><legend>Middle tick</legend><div class="seg">${step.mids.map((m,i)=>`<button data-act="gmid" data-i="${i}" aria-pressed="${g.mid===m}">${fmt(m)}</button>`).join('')}</div></fieldset>
+        <fieldset><legend>Dot</legend><div class="seg"><button data-act="gdot" data-v="open" aria-pressed="${g.dot==='open'}">Open</button><button data-act="gdot" data-v="filled" aria-pressed="${g.dot==='filled'}">Filled</button></div></fieldset>
+        <fieldset><legend>Shade</legend><div class="seg"><button data-act="gshade" data-v="left" aria-pressed="${g.shade==='left'}">← Left</button><button data-act="gshade" data-v="right" aria-pressed="${g.shade==='right'}">Right →</button></div></fieldset>
+      </div>
+      ${fbHTML()}
+      <div class="row"><button class="btn primary" data-act="gcheck" ${ready?'':'disabled'}>Check graph</button></div>
+      ${toolsHTML(step)}</section>`;
+  }else{
+    area=`<section class="card"><p class="prompt">${step.prompt}</p>
+      <div class="opts ${step.tag==='box'?'box':''}">${step.options.map((o,i)=>{const bad=R.wrong.includes(i);return `<button class="opt ${bad?'bad':''}" data-act="opt" data-i="${i}" ${bad?'disabled':''}>${o.html}</button>`;}).join('')}</div>
+      ${fbHTML()}${toolsHTML(step)}</section>`;
+  }
+  return `<div class="roundhead"><div class="rh-left">${belt?beltHTML(belt,0)+belt.name:'Open mat · '+TRACKS[R.track]} · Problem ${R.idx+1} of ${ROUND}</div><div class="slots" aria-label="${R.results.filter(Boolean).length} clean so far">${slots}</div></div>
+  <section class="card">
+    <ul class="phases">${phasesHTML(Pr,R.step,R.done)}</ul>
+    ${isRot?`<div class="problem rot">${Pr.startHTML}</div>`:`<div class="problem">${lineHTML(Pr.start,Pr.rightSide)}</div>`}
+    <div class="pad">${pad||'<span class="empty">Your work shows up here, one line at a time.</span>'}</div>
+  </section>${area}`;
+}
+function viewResult(){
+  const R=state.round,{n,promoted}=R.summary,belt=R.belt?BELTS.find(b=>b.id===R.belt):null;
+  let msg;
+  if(!belt)msg=`<h2>Open mat done</h2><p class="lede">${n} of ${ROUND} clean.</p>`;
+  else if(promoted)msg=`<p class="eyebrow">Promoted</p><h2 style="font-size:30px">You earned your ${belt.name}</h2><div class="big-belt">${beltHTML(belt,4)}</div>`;
+  else if(n>=PASS)msg=`<h2>${belt.name} test passed again</h2><p class="lede">Already earned. Nice retest.</p>`;
+  else msg=`<h2>Not this time</h2><p class="lede">You need ${PASS} clean to earn the ${belt.name}. You got ${n}. Roll again.</p>`;
+  return `<section class="card"><div class="result-num">${n}/${ROUND}</div><p class="fine">clean problems</p>${msg}
+    <div class="row">${belt&&!promoted&&n<PASS?`<button class="btn primary" data-act="train" data-belt="${belt.id}">Try again</button>`:''}
+    ${!belt?`<button class="btn primary" data-act="openmat" data-track="${R.track}">Roll again</button>`:''}
+    <button class="btn ${promoted?'primary':''}" data-act="map">Belts</button></div></section>`;
+}
+function cheatHTML(){
+  return `<div class="overlay" data-act="cheat-bg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cheat-title">
+    <div class="sheethead"><h2 id="cheat-title">How do I start?</h2><button class="btn" data-act="cheat-close">Close</button></div>
+    <ol class="order"><li>See ( )? → <b>Box D</b></li><li>× or ÷ AND + or −? → <b>Box C</b></li><li>Only + or −? → <b>Box A</b></li><li>Only × or ÷ (or a fraction)? → <b>Box B</b></li></ol>
+    <div class="boxes">
+      <div><h3>A · Just + or −</h3><p>Do the opposite to both sides. One move.</p></div>
+      <div><h3>B · Just × or ÷</h3><p>Undo it to both sides. Fraction? × the bottom number. Negative? FLIP.</p></div>
+      <div><h3>C · Two steps</h3><p>Get rid of the + or − first. Then the × or ÷.</p></div>
+      <div><h3>D · Parentheses</h3><p>Multiply the outside number into everything inside. Now it’s Box C.</p></div>
+    </div>
+    <p><b>Flip rule:</b> × or ÷ by a negative flips the sign. Nothing else does.</p>
+    <p><b>Letter on the right?</b> Solve it, then swap sides. The sign turns with them.</p>
+    <p><b>Draw it:</b> answer on the middle tick. Line under the sign = filled dot. Greater shades right, less shades left.</p>
+    <h2 style="margin-top:8px">Rotations around the origin</h2>
+    <ol class="order">
+      <li><b>Name the turn.</b> 180° = half turn. 90° = quarter turn. 270° one way = a quarter turn the <b>other</b> way.</li>
+      <li><b>Half turn:</b> change BOTH signs. (−3, 2) → (3, −2)</li>
+      <li><b>Quarter turn:</b> SWAP the numbers, then change ONE sign. Counterclockwise ↺ changes the <b>first</b>. Clockwise ↻ changes the <b>second</b>.</li>
+      <li><b>Plot it.</b> First number: left or right. Second number: up or down.</li>
+    </ol>
+    <div style="overflow-x:auto"><table class="rules">
+      <tr><th>Turn</th><th>Rule</th><th>(2, 5) goes to</th></tr>
+      <tr><td>Quarter ↺ (90° ccw or 270° cw)</td><td>swap, change first</td><td>(−5, 2)</td></tr>
+      <tr><td>Half (180° either way)</td><td>change both</td><td>(−2, −5)</td></tr>
+      <tr><td>Quarter ↻ (90° cw or 270° ccw)</td><td>swap, change second</td><td>(5, −2)</td></tr>
+    </table></div>
+  </div></div>`;
+}
+function render(){
+  let main='';
+  if(state.screen==='login'||!state.player||!me()){state.screen='login';main=viewLogin();}
+  else if(state.screen==='map')main=viewMap();
+  else if(state.screen==='round')main=viewRound();
+  else if(state.screen==='result')main=viewResult();
+  document.getElementById('app').innerHTML=topBar()+main+(state.cheat?cheatHTML():'');
+  if(state.round)state.round.fresh=99;
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');if(!el)return;
+  const act=el.dataset.act;
+  if(act==='cheat-bg'&&e.target!==el)return;
+  const R=state.round;
+  switch(act){
+    case 'pick':state.player=el.dataset.name;store.last=state.player;state.track=null;state.screen='map';save();break;
+    case 'map':state.screen='map';break;
+    case 'topic':state.track=el.dataset.track;state.screen='map';break;
+    case 'topics':state.track=null;state.screen='map';break;
+    case 'switch':state.player=null;state.screen='login';break;
+    case 'train':startRound(el.dataset.belt);break;
+    case 'openmat':startRound(null,el.dataset.track);break;
+    case 'plotclick':{
+      const r=el.getBoundingClientRect();
+      const gx=Math.round(((e.clientX-r.left)/r.width*440-220)/20),gy=Math.round((220-(e.clientY-r.top)/r.height*440)/20);
+      R.g.px=Math.max(-10,Math.min(10,gx));R.g.py=Math.max(-10,Math.min(10,gy));R.fb=null;break;}
+    case 'pcheck':checkPlot();return;
+    case 'opt':choose(+el.dataset.i);return;
+    case 'hint':R.hint=!R.hint;break;
+    case 'gmid':R.g.mid=curS().mids[+el.dataset.i];R.fb=null;break;
+    case 'gdot':R.g.dot=el.dataset.v;R.fb=null;break;
+    case 'gshade':R.g.shade=el.dataset.v;R.fb=null;break;
+    case 'gcheck':checkGraph();return;
+    case 'next':nextProblem();return;
+    case 'cheat':state.cheat=true;break;
+    case 'cheat-close':case 'cheat-bg':state.cheat=false;break;
+    default:return;
+  }
+  render();
+  if(act==='cheat'){const c=document.querySelector('[data-act="cheat-close"]');if(c)c.focus();}
+  if(act==='next'||act==='train'||act==='openmat')window.scrollTo(0,0);
+});
+document.addEventListener('submit',e=>{
+  if(e.target.id!=='new-form')return;
+  e.preventDefault();
+  const name=document.getElementById('player-name').value.trim().slice(0,20);
+  if(!name){state.err='Type your name first.';render();return;}
+  state.err='';
+  if(!store.players[name])store.players[name]=newPlayer();
+  state.player=name;store.last=name;state.track=null;state.screen='map';save();render();
+});
+document.addEventListener('change',e=>{
+  if(!state.round||(e.target.id!=='plot-x'&&e.target.id!=='plot-y'))return;
+  const v=e.target.value===''?null:Math.max(-10,Math.min(10,Math.round(+e.target.value)));
+  if(e.target.id==='plot-x')state.round.g.px=v;else state.round.g.py=v;
+  state.round.fb=null;render();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&state.cheat){state.cheat=false;render();}});
+
+/* ---------- boot ---------- */
+function boot(data){
+  if(data&&data.state)state=data.state;
+  else if(store.last&&store.players[store.last]){state.player=store.last;state.screen='map';}
+  render();
+}
+try{window.claude?.hot?.snapshot?.(()=>({state}));}catch(e){}
+if(window.claude?.hot?.ready)window.claude.hot.ready(boot);else boot(window.claude?.hot?.data??{});
+})();
+</script>
+</body>
+</html>
