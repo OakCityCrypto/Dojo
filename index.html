@@ -52,7 +52,7 @@ h2{font-size:22px;font-weight:800}
 .btn:hover{border-color:var(--ink-dim)}
 .btn.primary{background:var(--gold);color:var(--on-gold);border-color:var(--gold)}
 .btn.primary:hover{filter:brightness(1.06)}
-.link{background:none;border:none;color:var(--focus);font:600 15px var(--body);padding:8px 4px;cursor:pointer;min-height:44px}
+.link{background:none;border:none;color:var(--focus);font:600 15px var(--body);padding:8px 10px;cursor:pointer;min-height:44px;min-width:44px}
 .row{display:flex;gap:10px;flex-wrap:wrap}
 label{font-weight:700;font-size:15px}
 input{font:500 18px var(--body);padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--mat);color:var(--ink);min-height:44px;flex:1 1 180px;min-width:0}
@@ -118,7 +118,8 @@ input{font:500 18px var(--body);padding:10px 12px;border-radius:10px;border:1px 
 .opt{font:600 20px var(--body);color:var(--ink);background:var(--panel-2);border:2px solid var(--line);border-radius:12px;padding:12px 14px;min-height:58px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-variant-numeric:tabular-nums}
 .opt:hover:not(:disabled){border-color:var(--gold)}
 .opt.bad{border-color:var(--bad);color:var(--ink-dim);text-decoration:line-through;cursor:not-allowed}
-.opt .sub{font-size:14px;font-weight:500;color:var(--ink-dim)}
+.opt .ot{display:block;text-align:center;line-height:1.3}
+.opt .sub{display:block;font-size:14px;font-weight:500;color:var(--ink-dim)}
 .fb{padding:10px 14px;border-radius:10px;font-weight:600;font-size:16px}
 .fb.good{background:var(--good-bg);color:var(--good)}
 .fb.bad{background:var(--bad-bg);color:var(--ink);border-left:0;animation:shake .3s}
@@ -663,10 +664,10 @@ function viewRound(){
       ${toolsHTML(step)}</section>`;
   }else{
     area=`<section class="card"><p class="prompt">${step.prompt}</p>
-      <div class="opts ${step.tag==='box'?'box':''}">${step.options.map((o,i)=>{const bad=R.wrong.includes(i);return `<button class="opt ${bad?'bad':''}" data-act="opt" data-i="${i}" ${bad?'disabled':''}>${o.html}</button>`;}).join('')}</div>
+      <div class="opts ${step.tag==='box'?'box':''}">${step.options.map((o,i)=>{const bad=R.wrong.includes(i);return `<button class="opt ${bad?'bad':''}" data-act="opt" data-i="${i}" ${bad?'disabled':''}><span class="ot">${o.html}</span></button>`;}).join('')}</div>
       ${fbHTML()}${toolsHTML(step)}</section>`;
   }
-  return `<div class="roundhead"><div class="rh-left">${belt?beltHTML(belt,0)+belt.name:'Open mat · '+TRACKS[R.track]} · Problem ${R.idx+1} of ${ROUND}</div><div class="slots" aria-label="${R.results.filter(Boolean).length} clean so far">${slots}</div></div>
+  return `<div class="roundhead"><div class="rh-left">${belt?beltHTML(belt,0)+belt.name:'Open mat · '+TRACKS[R.track]} · Problem ${R.idx+1} of ${ROUND}</div><div class="slots" role="img" aria-label="${R.results.filter(Boolean).length} clean so far">${slots}</div></div>
   <section class="card">
     <ul class="phases">${phasesHTML(Pr,R.step,R.done)}</ul>
     ${isRot?`<div class="problem rot">${Pr.startHTML}</div>`:`<div class="problem">${lineHTML(Pr.start,Pr.rightSide)}</div>`}
@@ -713,6 +714,7 @@ function cheatHTML(){
     </table></div>
   </div></div>`;
 }
+let lastStepKey=null;
 function render(){
   let main='';
   if(state.screen==='login'||!state.player||!me()){state.screen='login';main=viewLogin();}
@@ -721,6 +723,13 @@ function render(){
   else if(state.screen==='result')main=viewResult();
   document.getElementById('app').innerHTML=topBar()+main+(state.cheat?cheatHTML():'');
   if(state.round)state.round.fresh=99;
+  const key=state.screen==='round'&&state.round?state.round.idx+':'+state.round.step+':'+state.round.done:null;
+  if(key&&key!==lastStepKey&&!key.endsWith(':0:false')){
+    const cards=document.querySelectorAll('#app > .card');const c=cards[cards.length-1];
+    let reduce=false;try{reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}
+    if(c&&c.scrollIntoView)c.scrollIntoView({block:'nearest',behavior:reduce?'auto':'smooth'});
+  }
+  lastStepKey=key;
 }
 
 /* ---------- events ---------- */
