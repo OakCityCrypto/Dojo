@@ -635,7 +635,7 @@ function viewRound(){
       ${gridSVG(Pr,null,true)}
       <p class="fine" style="text-align:center">The dashed lines show the turn around the origin.</p>
       <div class="row"><button class="btn primary" data-act="next">${R.idx+1<R.problems.length?'Next problem':'See results'}</button></div></section>`;
-  }else if(step.kind==='plot'){
+  }else if(!R.done&&step&&step.kind==='plot'){
     const g=R.g,ready=g.px!==null&&g.py!==null;
     area=`<section class="card"><p class="prompt">Plot ${V(Pr.name)}′${pt(Pr.ax,Pr.ay)}. Tap its spot on the grid.</p>
       ${gridSVG(Pr,{x:g.px,y:g.py},false)}
